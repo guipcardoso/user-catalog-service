@@ -10,7 +10,6 @@ public class User {
 	private String userName;
 	private String firstName;
 	private String lastName;
-	private String cpf;
 
 	public String getUserName() {
 		return userName;
@@ -35,13 +34,4 @@ public class User {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-
-	public String getCpf() {
-		return cpf == null ? "Sem CPF" : cpf;
-	}
-
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
-	}
-
 }
