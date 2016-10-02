@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar /home/ec2-user/user-catalog-service/user-catalog-service.jar > /dev/null 2> /dev/null < /dev/null &
+java -Xmx768m -Xms512m -jar /home/ec2-user/user-catalog-service/user-catalog-service.jar > /dev/null 2> /dev/null < /dev/null &
