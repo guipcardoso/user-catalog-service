@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mvn clean package
+cp target/user-catalog-service-0.1.0.jar /home/ec2-user/user-catalog-service/user-catalog-service-0.1.0.jar
