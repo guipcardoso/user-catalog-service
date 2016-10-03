@@ -1,0 +1,48 @@
+## this first bash script goes into the "user data" field of EC2 Instance/Auto-Scaling Group
+#_______________________________________________
+
+#!/bin/bash
+yum update -y
+yum install ruby -y
+yum install wget -y
+cd /home/ec2-user
+wget https://aws-codedeploy-eu-central-1.s3.amazonaws.com/latest/install
+chmod +x ./install
+./install auto
+yum remove java -y
+yum install java-1.8.0-openjdk.x86_64 -y
+iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
+iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
+
+#_______________________________________________
+
+## and this second one is executed by jenkins build
+
+export JAVA_HOME=/etc/alternatives/java_sdk/
+/opt/apache-maven-3.3.9/bin/mvn clean package
+rm -rf tmp
+mkdir tmp
+cp target/user-catalog-service-0.1.0.jar tmp/user-catalog-service.jar
+cp -R scripts tmp/
+cp appspec.yml tmp/
+aws deploy push \
+  --region eu-central-1 \
+  --application-name user-catalog-service \
+    --s3-location s3://user-catalog-service-build/build.zip \
+    --source tmp/
+last_build=$(
+  aws deploy list-application-revisions \
+      --region eu-central-1 \
+      --application-name user-catalog-service \
+        --s-3-bucket user-catalog-service-build \
+        --sort-by registerTime \
+        --sort-order descending |
+  jq ".revisions[0].s3Location"
+)
+build_etag=$( echo "$last_build" | jq ".eTag" | tr -d "\\\\\"" )
+aws deploy create-deployment \
+  --region eu-central-1 \
+  --application-name user-catalog-service \
+    --s3-location bucket=user-catalog-service-build,key=build.zip,bundleType=zip,eTag="$build_etag"\
+    --deployment-group-name user-catalog-service-deploy \
+    --deployment-config-name CodeDeployDefault.OneAtATime
