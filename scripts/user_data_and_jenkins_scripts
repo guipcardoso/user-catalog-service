@@ -5,12 +5,12 @@
 yum update -y
 yum install ruby -y
 yum install wget -y
+yum remove java -y
+yum install java-1.8.0-openjdk.x86_64 -y
 cd /home/ec2-user
 wget https://aws-codedeploy-eu-central-1.s3.amazonaws.com/latest/install
 chmod +x ./install
 ./install auto
-yum remove java -y
-yum install java-1.8.0-openjdk.x86_64 -y
 iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
 iptables -t nat -I OUTPUT -p tcp -o lo --dport 80 -j REDIRECT --to-ports 8080
 
